@@ -10,6 +10,8 @@ module.exports = {
   parserOptions: {
     ecmaVersion: "latest",
     sourceType: "module",
+    project: ["./tsconfig.json"],
+    tsconfigRootDir: __dirname,
     ecmaFeatures: {
       jsx: true,
     },
@@ -22,7 +24,7 @@ module.exports = {
   ignorePatterns: ["!**/.server", "!**/.client"],
 
   // Base config
-  extends: ["eslint:recommended"],
+  extends: ["eslint:recommended", "prettier"],
 
   overrides: [
     // React
@@ -67,7 +69,8 @@ module.exports = {
         },
       },
       extends: [
-        "plugin:@typescript-eslint/recommended",
+        "plugin:@typescript-eslint/strict-type-checked",
+        "plugin:@typescript-eslint/stylistic-type-checked",
         "plugin:import/recommended",
         "plugin:import/typescript",
       ],
