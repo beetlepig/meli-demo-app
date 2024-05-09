@@ -35,7 +35,7 @@ module.exports = {
         "plugin:react/recommended",
         "plugin:react/jsx-runtime",
         "plugin:react-hooks/recommended",
-        "plugin:jsx-a11y/recommended",
+        "plugin:jsx-a11y/strict",
       ],
       settings: {
         react: {
