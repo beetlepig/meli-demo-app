@@ -3,6 +3,56 @@ import { json, type LoaderFunctionArgs, type MetaFunction } from "@remix-run/nod
 import { useLoaderData } from "@remix-run/react";
 import { z, ZodType } from "zod";
 
+interface ICategoryDetails {
+	id: string;
+	name: string;
+	picture: string | null;
+	permalink: string | null;
+	total_items_in_this_category: number;
+	path_from_root: {
+		id: string;
+		name: string;
+	}[];
+	children_categories: {
+		id: string;
+		name: string;
+		total_items_in_this_category: number;
+	}[];
+	attribute_types: string;
+	settings?: unknown;
+	channels_settings?: unknown;
+	meta_categ_id: null;
+	attributable: boolean;
+	date_created: string;
+}
+const categoryDetailsScheme = z.object({
+	id: z.string(),
+	name: z.string(),
+	picture: z.string().or(z.null()),
+	permalink: z.string().or(z.null()),
+	total_items_in_this_category: z.number(),
+	path_from_root: z.array(
+		z.object({
+			id: z.string(),
+			name: z.string()
+		})
+	),
+	children_categories: z.array(
+		z.object({
+			id: z.string(),
+			name: z.string(),
+			total_items_in_this_category: z.number()
+		})
+	),
+	attribute_types: z.string(),
+	settings: z.unknown(),
+	channels_settings: z.unknown(),
+	meta_categ_id: z.null(),
+	attributable: z.boolean(),
+	date_created: z.string()
+}) satisfies ZodType<ICategoryDetails>;
+
+// TODO: Pasar eso al dominio y evitar repiticion
 interface ICurrencyResponse {
 	id: string;
 	symbol: string;
@@ -23,6 +73,7 @@ const endpointErrorScheme = z.object({
 const itemDetailScheme = z.object({
 	id: z.string(),
 	title: z.string(),
+	category_id: z.string(),
 	price: z.number(),
 	currency_id: z.string(),
 	condition: z.string(),
@@ -92,7 +143,6 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 			}
 		);
 	}
-
 	const itemDetailsJSON = itemDetailScheme.safeParse(await itemDetails.json());
 	invariantResponse(
 		itemDetailsJSON.success,
@@ -102,6 +152,24 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 	invariantResponse(
 		itemDescriptionJSON.success,
 		itemDescriptionJSON.error?.message ?? "Invalid item description object"
+	);
+
+	const categoryResponse = await fetch(
+		`https://api.mercadolibre.com/categories/${itemDetailsJSON.data.category_id}`
+	);
+	if (!categoryResponse.ok) {
+		const currencyResponseFailedJSON = endpointErrorScheme.safeParse(await categoryResponse.json());
+
+		// eslint-disable-next-line @typescript-eslint/no-throw-literal
+		throw new Response(currencyResponseFailedJSON.data?.message ?? "Not a valid category", {
+			status: categoryResponse.status,
+			statusText: categoryResponse.statusText
+		});
+	}
+	const categoryResponseJSON = categoryDetailsScheme.safeParse(await categoryResponse.json());
+	invariantResponse(
+		categoryResponseJSON.success,
+		categoryResponseJSON.error?.message ?? "Invalid category object"
 	);
 
 	const currencyResponse = await fetch(
@@ -116,7 +184,6 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 			statusText: currencyResponse.statusText
 		});
 	}
-
 	const currencyResponseJSON = currencyResponseScheme.safeParse(await currencyResponse.json());
 	invariantResponse(
 		currencyResponseJSON.success,
@@ -126,6 +193,7 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 	return json({
 		id: itemDetailsJSON.data.id,
 		title: itemDetailsJSON.data.title,
+		categories: categoryResponseJSON.data.path_from_root.map((category) => category.name),
 		price: {
 			currency: currencyResponseJSON.data.id,
 			amount: itemDetailsJSON.data.price,
