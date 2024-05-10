@@ -2,9 +2,11 @@ import { type FunctionComponent, memo } from "react";
 
 interface SearchInputProps {
 	name: string;
+	value?: string;
+	onChange?: (value: string) => void;
 }
 
-const SearchInput: FunctionComponent<SearchInputProps> = ({ name }) => {
+const SearchInput: FunctionComponent<SearchInputProps> = ({ name, value, onChange }) => {
 	return (
 		<div className={"relative flex h-full w-full"}>
 			<label className={"absolute h-1 w-1 overflow-hidden whitespace-nowrap"} htmlFor={name}>
@@ -12,6 +14,10 @@ const SearchInput: FunctionComponent<SearchInputProps> = ({ name }) => {
 			</label>
 			<input
 				className={"w-full rounded-sm px-3 text-base font-light"}
+				value={value}
+				onChange={(event) => {
+					onChange?.(event.currentTarget.value);
+				}}
 				type={"search"}
 				id={name}
 				name={name}
