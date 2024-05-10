@@ -1,7 +1,20 @@
 import { invariantResponse } from "@epic-web/invariant";
 import { json, type LoaderFunctionArgs, type MetaFunction } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
-import { z } from "zod";
+import { z, ZodType } from "zod";
+
+interface ICurrencyResponse {
+	id: string;
+	symbol: string;
+	description: string;
+	decimal_places: number;
+}
+const currencyResponseScheme = z.object({
+	id: z.string(),
+	symbol: z.string(),
+	description: z.string(),
+	decimal_places: z.number()
+}) satisfies ZodType<ICurrencyResponse>;
 
 const endpointErrorScheme = z.object({
 	error: z.string(),
@@ -9,10 +22,42 @@ const endpointErrorScheme = z.object({
 });
 const itemDetailScheme = z.object({
 	id: z.string(),
-	title: z.string()
+	title: z.string(),
+	price: z.number(),
+	currency_id: z.string(),
+	condition: z.string(),
+	pictures: z.array(
+		z.object({
+			id: z.string(),
+			url: z.string(),
+			secure_url: z.string(),
+			size: z.string(),
+			max_size: z.string(),
+			quality: z.string()
+		})
+	),
+	shipping: z.object({
+		mode: z.string(),
+		methods: z.array(z.unknown()),
+		tags: z.array(z.string()),
+		dimensions: z.null(),
+		local_pick_up: z.boolean(),
+		free_shipping: z.boolean(),
+		logistic_type: z.string(),
+		store_pick_up: z.boolean()
+	})
 });
 const itemDescriptionScheme = z.object({
-	plain_text: z.string()
+	text: z.string(),
+	plain_text: z.string(),
+	last_updated: z.string(),
+	date_created: z.string(),
+	snapshot: z.object({
+		url: z.string(),
+		width: z.number(),
+		height: z.number(),
+		status: z.string()
+	})
 });
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => {
@@ -32,7 +77,6 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 
 	const itemDetails = await fetch(`https://api.mercadolibre.com/items/${itemId}`);
 	const itemDescription = await fetch(`https://api.mercadolibre.com/items/${itemId}/description`);
-
 	if (!itemDetails.ok || !itemDescription.ok) {
 		const itemDetailsFailedJSON = endpointErrorScheme.safeParse(await itemDetails.json());
 		const itemDescriptionFailedJSON = endpointErrorScheme.safeParse(await itemDescription.json());
@@ -54,14 +98,44 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 		itemDetailsJSON.success,
 		itemDetailsJSON.error?.message ?? "Invalid item detail object"
 	);
-
 	const itemDescriptionJSON = itemDescriptionScheme.safeParse(await itemDescription.json());
 	invariantResponse(
 		itemDescriptionJSON.success,
 		itemDescriptionJSON.error?.message ?? "Invalid item description object"
 	);
 
-	return json({ ...itemDetailsJSON.data, description: itemDescriptionJSON.data.plain_text });
+	const currencyResponse = await fetch(
+		`https://api.mercadolibre.com/currencies/${itemDetailsJSON.data.currency_id}`
+	);
+	if (!currencyResponse.ok) {
+		const currencyResponseFailedJSON = endpointErrorScheme.safeParse(await currencyResponse.json());
+
+		// eslint-disable-next-line @typescript-eslint/no-throw-literal
+		throw new Response(currencyResponseFailedJSON.data?.message ?? "Not a valid currency", {
+			status: currencyResponse.status,
+			statusText: currencyResponse.statusText
+		});
+	}
+
+	const currencyResponseJSON = currencyResponseScheme.safeParse(await currencyResponse.json());
+	invariantResponse(
+		currencyResponseJSON.success,
+		currencyResponseJSON.error?.message ?? "Invalid currency object"
+	);
+
+	return json({
+		id: itemDetailsJSON.data.id,
+		title: itemDetailsJSON.data.title,
+		price: {
+			currency: currencyResponseJSON.data.id,
+			amount: itemDetailsJSON.data.price,
+			decimals: currencyResponseJSON.data.decimal_places
+		},
+		picture: itemDetailsJSON.data.pictures[0].secure_url,
+		condition: itemDetailsJSON.data.condition,
+		free_shipping: itemDetailsJSON.data.shipping.free_shipping,
+		description: itemDescriptionJSON.data.plain_text
+	});
 };
 
 export default function ItemsIdRoute() {
