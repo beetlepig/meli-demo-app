@@ -12,13 +12,15 @@
     "format": "prettier -uw --cache --ignore-path .gitignore"
   },
   "dependencies": {
+    "@epic-web/invariant": "^1.0.0",
     "@fontsource-variable/roboto-flex": "^5.0.15",
     "@remix-run/node": "^2.9.1",
     "@remix-run/react": "^2.9.1",
     "@remix-run/serve": "^2.9.1",
     "isbot": "^4.1.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@remix-run/dev": "^2.9.1",

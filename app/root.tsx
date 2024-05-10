@@ -1,8 +1,8 @@
 import "@fontsource-variable/roboto-flex/wght.css";
 import type { LinksFunction } from "@remix-run/node";
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "@remix-run/react";
-import { Fragment, ReactNode } from "react";
-import { SearchBar } from "~/components/organisms/search-bar";
+import { Fragment, type ReactNode } from "react";
+import SearchBar from "~/components/organisms/search-bar";
 import stylesheet from "~/tailwind.css?url";
 
 export const links: LinksFunction = () => [{ rel: "stylesheet", href: stylesheet }];
@@ -20,6 +20,7 @@ export function Layout({ children }: { children: ReactNode }) {
 				{children}
 				<ScrollRestoration />
 				<Scripts />
+				{process.env.NODE_ENV === "development" && <script src="http://localhost:8097"></script>}
 			</body>
 		</html>
 	);
