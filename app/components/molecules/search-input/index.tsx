@@ -13,7 +13,7 @@ const SearchInput: FunctionComponent<SearchInputProps> = ({ name, value, onChang
 				Buscar en Mercado Libre:
 			</label>
 			<input
-				className={"w-full rounded-sm px-3 text-base font-light"}
+				className={"w-full rounded px-3 text-base font-light"}
 				value={value}
 				onChange={(event) => {
 					onChange?.(event.currentTarget.value);
@@ -24,7 +24,7 @@ const SearchInput: FunctionComponent<SearchInputProps> = ({ name, value, onChang
 				placeholder={"Nunca dejes de buscar"}
 			/>
 			<button
-				className={"absolute right-0 aspect-square h-full rounded-r-sm bg-gray-200"}
+				className={"absolute right-0 aspect-square h-full rounded-r bg-gray-200"}
 				type={"submit"}
 			>
 				<span className={"absolute h-1 w-1 overflow-hidden whitespace-nowrap"}>Search</span>

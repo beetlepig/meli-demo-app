@@ -2,6 +2,8 @@ import { invariantResponse } from "@epic-web/invariant";
 import { json, type LoaderFunctionArgs, type MetaFunction, redirect } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { z, ZodType } from "zod";
+import Breadcrumb from "~/components/atoms/breadcrumb";
+import ItemCard from "~/components/organisms/item-card";
 
 interface ICurrencyResponse {
 	id: string;
@@ -119,7 +121,7 @@ interface ISearchResponse {
 		values: {
 			id: string;
 			name: string;
-			path_from_root: {
+			path_from_root?: {
 				id: string;
 				name: string;
 			}[];
@@ -160,12 +162,14 @@ const searchResponseScheme = z.object({
 				z.object({
 					id: z.string(),
 					name: z.string(),
-					path_from_root: z.array(
-						z.object({
-							id: z.string(),
-							name: z.string()
-						})
-					)
+					path_from_root: z
+						.array(
+							z.object({
+								id: z.string(),
+								name: z.string()
+							})
+						)
+						.optional()
 				})
 			)
 		})
@@ -176,7 +180,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 	invariantResponse(data, "Meta - Missing search parameter");
 
 	return [
-		{ title: data.search },
+		{ title: `${data.search} | Mercado Libre` },
 		{
 			name: "description",
 			content: `Compre ${data.search} ahora mismo.`
@@ -193,11 +197,6 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 	const siteResponse = await fetch("https://api.mercadolibre.com/sites/MCO");
 	invariantResponse(siteResponse.ok, "Invalid site");
-	const searchResponse = await fetch(
-		`https://api.mercadolibre.com/sites/MCO/search?q=${search}&limit=4`
-	);
-	invariantResponse(searchResponse.ok, "Invalid search parameter");
-
 	const siteResponseJSON = siteResponseScheme.safeParse(await siteResponse.json());
 	invariantResponse(
 		siteResponseJSON.success,
@@ -224,6 +223,10 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 		})
 	);
 
+	const searchResponse = await fetch(
+		`https://api.mercadolibre.com/sites/MCO/search?q=${search}&limit=4`
+	);
+	invariantResponse(searchResponse.ok, "Invalid search parameter");
 	const searchResponseJSON = searchResponseScheme.safeParse(await searchResponse.json());
 	invariantResponse(
 		searchResponseJSON.success,
@@ -233,9 +236,12 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 	return json({
 		search,
 		searchData: {
-			categories: searchResponseJSON.data.filters.flatMap((filter) =>
-				filter.values.flatMap((filterValue) => filterValue.path_from_root)
-			),
+			categories:
+				searchResponseJSON.data.filters
+					.find((filter) => filter.id === "category")
+					?.values.flatMap(
+						(filterValue) => filterValue.path_from_root?.map((category) => category.name) ?? []
+					) ?? [],
 			items: searchResponseJSON.data.results.map((item) => {
 				const currencyData = currenciesResponseJSON.find(
 					(currency) => currency.id === item.currency_id
@@ -261,7 +267,39 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 export default function ItemsRoute() {
 	const { searchData } = useLoaderData<typeof loader>();
 
-	console.log(searchData);
-
-	return <div className={"contents"}>ola</div>;
+	return (
+		<div className={"mx-auto grid max-w-7xl grid-cols-12 gap-3"}>
+			<div className={"col-span-10 col-start-2"}>
+				<ol className={"mb-4 mt-3"}>
+					{searchData.categories.map((category, index) => (
+						<li key={category} className={"inline text-sm font-light text-gray-700"}>
+							<p
+								className={
+									index === searchData.categories.length - 1 ? "inline font-medium" : "inline"
+								}
+							>
+								{category}
+							</p>
+							{index < searchData.categories.length - 1 && (
+								<Breadcrumb className={"mx-1 inline h-3 w-3"} stroke={"currentColor"} />
+							)}
+						</li>
+					))}
+				</ol>
+				<section className={"mb-20 rounded-md bg-white px-4"}>
+					{searchData.items.map((item) => (
+						<ItemCard
+							key={item.id}
+							title={item.title}
+							amount={item.price.amount}
+							currency={item.price.currency}
+							decimals={item.price.decimals}
+							imageURL={item.picture}
+							freeShipping={item.free_shipping}
+						/>
+					))}
+				</section>
+			</div>
+		</div>
+	);
 }
