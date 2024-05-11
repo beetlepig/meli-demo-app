@@ -5,6 +5,8 @@ import BreadcrumbIcon from "app/components/atoms/icons/breadcrumb";
 import { clsx } from "clsx/lite";
 import { useMemo } from "react";
 import { z, ZodType } from "zod";
+import PageContainer from "~/components/layout/page-container";
+import BreadcrumbList from "~/components/molecules/breadcrumb-list";
 import ItemCard from "~/components/organisms/item-card";
 
 interface ICurrencyResponse {
@@ -268,48 +270,25 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 export default function ItemsRoute() {
 	const { searchData } = useLoaderData<typeof loader>();
-	const navigation = useNavigation();
-	const loading = useMemo(() => navigation.state === "loading", [navigation.state]);
 
 	return (
-		<div
-			className={clsx(
-				"mx-auto grid max-w-7xl grid-cols-12 gap-3",
-				loading && "opacity-40 transition-opacity"
-			)}
-		>
-			<div className={"col-span-10 col-start-2"}>
-				<ol className={"mb-4 mt-3"}>
-					{searchData.categories.map((category, index) => (
-						<li key={category} className={"inline text-sm font-light text-gray-700"}>
-							<p
-								className={
-									index === searchData.categories.length - 1 ? "inline font-medium" : "inline"
-								}
-							>
-								{category}
-							</p>
-							{index < searchData.categories.length - 1 && (
-								<BreadcrumbIcon className={"mx-1 inline h-3 w-3"} stroke={"currentColor"} />
-							)}
-						</li>
-					))}
-				</ol>
-				<section className={"mb-20 rounded-md bg-white px-4"}>
-					{searchData.items.map((item) => (
-						<ItemCard
-							id={item.id}
-							key={item.id}
-							title={item.title}
-							amount={item.price.amount}
-							currency={item.price.currency}
-							decimals={item.price.decimals}
-							imageURL={item.picture}
-							freeShipping={item.free_shipping}
-						/>
-					))}
-				</section>
-			</div>
-		</div>
+		<PageContainer>
+			<BreadcrumbList categoryList={searchData.categories} />
+
+			<section className={"mb-20 rounded-md bg-white px-4"}>
+				{searchData.items.map((item) => (
+					<ItemCard
+						id={item.id}
+						key={item.id}
+						title={item.title}
+						amount={item.price.amount}
+						currency={item.price.currency}
+						decimals={item.price.decimals}
+						imageURL={item.picture}
+						freeShipping={item.free_shipping}
+					/>
+				))}
+			</section>
+		</PageContainer>
 	);
 }

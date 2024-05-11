@@ -1,5 +1,6 @@
 import { Link } from "@remix-run/react";
 import { type FunctionComponent, memo, useMemo } from "react";
+import useFormatPrice from "~/hooks/format-price";
 
 interface ItemCardProps {
 	id: string;
@@ -20,15 +21,11 @@ const ItemCard: FunctionComponent<ItemCardProps> = ({
 	imageURL,
 	freeShipping
 }) => {
-	const formattedPrice = useMemo(
-		() =>
-			new Intl.NumberFormat("es-CO", {
-				style: "currency",
-				currency: currency,
-				maximumFractionDigits: decimals
-			}).format(amount),
-		[amount, currency, decimals]
-	);
+	const formattedPrice = useFormatPrice({
+		currency: currency,
+		decimals: decimals,
+		amount: amount
+	});
 
 	return (
 		<div className={"flex border-b border-gray-100 py-4"}>
@@ -48,7 +45,7 @@ const ItemCard: FunctionComponent<ItemCardProps> = ({
 								width={18}
 								height={18}
 								alt={"Free Shipping"}
-								className={"inline align-middle"}
+								className={"inline max-h-[180px] align-middle"}
 								src={"/icons/ic_shipping.png"}
 								srcSet="/icons/ic_shipping.png 1x,
   							/icons/ic_shipping@2x.png 2x"
