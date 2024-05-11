@@ -1,6 +1,8 @@
+import { Link } from "@remix-run/react";
 import { type FunctionComponent, memo, useMemo } from "react";
 
 interface ItemCardProps {
+	id: string;
 	title: string;
 	amount: number;
 	currency: string;
@@ -10,6 +12,7 @@ interface ItemCardProps {
 }
 
 const ItemCard: FunctionComponent<ItemCardProps> = ({
+	id,
 	title,
 	amount,
 	currency,
@@ -37,20 +40,22 @@ const ItemCard: FunctionComponent<ItemCardProps> = ({
 				src={imageURL}
 			/>
 			<div className={"ml-4"}>
-				<h3 className={"my-4 text-2xl font-light"}>
-					<span className={"align-middle after:mr-3 after:content-['']"}>{formattedPrice}</span>
-					{freeShipping && (
-						<img
-							width={18}
-							height={18}
-							alt={"Free Shipping"}
-							className={"inline align-middle"}
-							src={"/icons/ic_shipping.png"}
-							srcSet="/icons/ic_shipping.png 1x,
+				<Link to={`/items/${id}`} title={title}>
+					<h3 className={"my-4 text-2xl font-light"}>
+						<span className={"align-middle after:mr-3 after:content-['']"}>{formattedPrice}</span>
+						{freeShipping && (
+							<img
+								width={18}
+								height={18}
+								alt={"Free Shipping"}
+								className={"inline align-middle"}
+								src={"/icons/ic_shipping.png"}
+								srcSet="/icons/ic_shipping.png 1x,
   							/icons/ic_shipping@2x.png 2x"
-						/>
-					)}
-				</h3>
+							/>
+						)}
+					</h3>
+				</Link>
 				<h2 className={"text-lg font-light"}>{title}</h2>
 			</div>
 		</div>

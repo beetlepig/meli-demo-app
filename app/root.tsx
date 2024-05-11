@@ -1,7 +1,15 @@
 import "@fontsource-variable/roboto-flex/wght.css";
 import { json, type LinksFunction, type LoaderFunctionArgs } from "@remix-run/node";
-import { Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData } from "@remix-run/react";
-import { Fragment, type ReactNode } from "react";
+import {
+	Links,
+	Meta,
+	Outlet,
+	Scripts,
+	ScrollRestoration,
+	useLoaderData,
+	useNavigation
+} from "@remix-run/react";
+import { Fragment, type ReactNode, useMemo } from "react";
 import SearchBar from "~/components/organisms/search-bar";
 import stylesheet from "~/tailwind.css?url";
 
@@ -34,11 +42,16 @@ export function Layout({ children }: { children: ReactNode }) {
 
 export default function App() {
 	const { search } = useLoaderData<typeof loader>();
+	const navigation = useNavigation();
+	const searching = useMemo(
+		() => navigation.location && new URLSearchParams(navigation.location.search).has("search"),
+		[navigation.location]
+	);
 
 	return (
 		<Fragment>
 			<header>
-				<SearchBar value={search ?? undefined} />
+				<SearchBar value={search ?? undefined} loading={searching} />
 			</header>
 			<Outlet />
 		</Fragment>

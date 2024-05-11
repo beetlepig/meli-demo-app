@@ -5,9 +5,10 @@ import SearchInput from "~/components/molecules/search-input";
 
 interface SearchBarProps {
 	value?: string;
+	loading?: boolean;
 }
 
-const SearchBar: FunctionComponent<SearchBarProps> = ({ value }) => {
+const SearchBar: FunctionComponent<SearchBarProps> = ({ value, loading }) => {
 	const [searchValue, setSearchValue] = useState(value ?? "");
 
 	useEffect(() => {
@@ -22,7 +23,12 @@ const SearchBar: FunctionComponent<SearchBarProps> = ({ value }) => {
 				</Link>
 				<div className={"col-span-10 col-start-3 h-14 py-2 sm:col-span-9"}>
 					<Form action="items" className={"h-full"} role={"search"}>
-						<SearchInput name={"search"} value={searchValue} onChange={setSearchValue} />
+						<SearchInput
+							name={"search"}
+							value={searchValue}
+							loading={loading}
+							onChange={setSearchValue}
+						/>
 					</Form>
 				</div>
 			</div>

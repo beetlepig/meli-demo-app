@@ -1,8 +1,10 @@
 import { invariantResponse } from "@epic-web/invariant";
 import { json, type LoaderFunctionArgs, type MetaFunction, redirect } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import { useLoaderData, useNavigation } from "@remix-run/react";
+import BreadcrumbIcon from "app/components/atoms/icons/breadcrumb";
+import { clsx } from "clsx/lite";
+import { useMemo } from "react";
 import { z, ZodType } from "zod";
-import Breadcrumb from "~/components/atoms/breadcrumb";
 import ItemCard from "~/components/organisms/item-card";
 
 interface ICurrencyResponse {
@@ -266,9 +268,16 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 export default function ItemsRoute() {
 	const { searchData } = useLoaderData<typeof loader>();
+	const navigation = useNavigation();
+	const loading = useMemo(() => navigation.state === "loading", [navigation.state]);
 
 	return (
-		<div className={"mx-auto grid max-w-7xl grid-cols-12 gap-3"}>
+		<div
+			className={clsx(
+				"mx-auto grid max-w-7xl grid-cols-12 gap-3",
+				loading && "opacity-40 transition-opacity"
+			)}
+		>
 			<div className={"col-span-10 col-start-2"}>
 				<ol className={"mb-4 mt-3"}>
 					{searchData.categories.map((category, index) => (
@@ -281,7 +290,7 @@ export default function ItemsRoute() {
 								{category}
 							</p>
 							{index < searchData.categories.length - 1 && (
-								<Breadcrumb className={"mx-1 inline h-3 w-3"} stroke={"currentColor"} />
+								<BreadcrumbIcon className={"mx-1 inline h-3 w-3"} stroke={"currentColor"} />
 							)}
 						</li>
 					))}
@@ -289,6 +298,7 @@ export default function ItemsRoute() {
 				<section className={"mb-20 rounded-md bg-white px-4"}>
 					{searchData.items.map((item) => (
 						<ItemCard
+							id={item.id}
 							key={item.id}
 							title={item.title}
 							amount={item.price.amount}
