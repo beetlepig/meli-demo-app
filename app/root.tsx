@@ -10,6 +10,7 @@ import {
 } from "@remix-run/react";
 import { Analytics } from "@vercel/analytics/react";
 import { json, type LinksFunction, type LoaderFunctionArgs } from "@vercel/remix";
+import { SpeedInsights } from "@vercel/speed-insights/remix";
 import { Fragment, type ReactNode, useMemo } from "react";
 import SearchBar from "~/components/organisms/search-bar";
 import stylesheet from "~/tailwind.css?url";
@@ -38,6 +39,7 @@ export function Layout({ children }: { children: ReactNode }) {
 				<ScrollRestoration />
 				<Scripts />
 				<Analytics />
+				<SpeedInsights />
 				{process.env.NODE_ENV === "development" && <script src="http://localhost:8097"></script>}
 			</body>
 		</html>
