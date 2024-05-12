@@ -1,5 +1,5 @@
 import { Link } from "@remix-run/react";
-import { type FunctionComponent, memo, useMemo } from "react";
+import { type FunctionComponent, memo } from "react";
 import useFormatPrice from "~/hooks/format-price";
 
 interface ItemCardProps {
@@ -10,6 +10,7 @@ interface ItemCardProps {
 	decimals: number;
 	imageURL: string;
 	freeShipping: boolean;
+	sellerLocation: string | null;
 }
 
 const ItemCard: FunctionComponent<ItemCardProps> = ({
@@ -19,7 +20,8 @@ const ItemCard: FunctionComponent<ItemCardProps> = ({
 	currency,
 	decimals,
 	imageURL,
-	freeShipping
+	freeShipping,
+	sellerLocation
 }) => {
 	const formattedPrice = useFormatPrice({
 		currency: currency,
@@ -28,15 +30,15 @@ const ItemCard: FunctionComponent<ItemCardProps> = ({
 	});
 
 	return (
-		<div className={"flex border-b border-gray-100 py-4"}>
+		<div className={"grid grid-cols-10 border-b border-gray-100 py-4"}>
 			<img
-				className={"h-[180px] w-[180px] rounded object-contain"}
+				className={"col-span-3 h-[180px] w-[180px] rounded object-contain md:col-span-2"}
 				width={180}
 				height={180}
 				alt={title}
 				src={imageURL}
 			/>
-			<div className={"ml-4"}>
+			<div className={"col-span-7 ml-4 md:col-span-6"}>
 				<Link to={`/items/${id}`} title={title}>
 					<h3 className={"my-4 text-2xl font-light"}>
 						<span className={"align-middle after:mr-3 after:content-['']"}>{formattedPrice}</span>
@@ -54,7 +56,13 @@ const ItemCard: FunctionComponent<ItemCardProps> = ({
 					</h3>
 				</Link>
 				<h2 className={"text-lg font-light"}>{title}</h2>
+				<h5 className={"col-span-2 my-4 text-sm font-light text-gray-800 md:hidden"}>
+					{sellerLocation}
+				</h5>
 			</div>
+			<h5 className={"col-span-2 my-6 hidden text-sm font-light text-gray-800 md:block"}>
+				{sellerLocation}
+			</h5>
 		</div>
 	);
 };

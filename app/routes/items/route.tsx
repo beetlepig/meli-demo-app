@@ -1,13 +1,58 @@
-import { invariantResponse } from "@epic-web/invariant";
+import { invariant, invariantResponse } from "@epic-web/invariant";
 import { json, type LoaderFunctionArgs, type MetaFunction, redirect } from "@remix-run/node";
-import { useLoaderData, useNavigation } from "@remix-run/react";
-import BreadcrumbIcon from "app/components/atoms/icons/breadcrumb";
-import { clsx } from "clsx/lite";
-import { useMemo } from "react";
+import { useLoaderData } from "@remix-run/react";
+import { promiseHash } from "remix-utils/promise";
 import { z, ZodType } from "zod";
 import PageContainer from "~/components/layout/page-container";
 import BreadcrumbList from "~/components/molecules/breadcrumb-list";
 import ItemCard from "~/components/organisms/item-card";
+
+interface ISellerDetailsResponse {
+	id: number;
+	nickname: string;
+	country_id: string;
+	address: {
+		city: string;
+		state: string;
+	};
+	user_type: string;
+	site_id: string;
+	permalink: string;
+	seller_reputation: {
+		level_id: string;
+		power_seller_status: string | null;
+		transactions: {
+			period: string;
+			total: number;
+		};
+	};
+	status: {
+		site_status: string;
+	};
+}
+const sellerDetailsResponseSchema = z.object({
+	id: z.number(),
+	nickname: z.string(),
+	country_id: z.string(),
+	address: z.object({
+		city: z.string(),
+		state: z.string()
+	}),
+	user_type: z.string(),
+	site_id: z.string(),
+	permalink: z.string(),
+	seller_reputation: z.object({
+		level_id: z.string(),
+		power_seller_status: z.string().or(z.null()),
+		transactions: z.object({
+			period: z.string(),
+			total: z.number()
+		})
+	}),
+	status: z.object({
+		site_status: z.string()
+	})
+}) satisfies ZodType<ISellerDetailsResponse>;
 
 interface ICurrencyResponse {
 	id: string;
@@ -22,6 +67,10 @@ const currencyResponseScheme = z.object({
 	decimal_places: z.number()
 }) satisfies ZodType<ICurrencyResponse>;
 
+interface ISiteCurrencies {
+	id: string;
+	symbol: string;
+}
 interface ISiteResponse {
 	id: string;
 	name: string;
@@ -47,7 +96,7 @@ interface ISiteResponse {
 			  }[]
 			| null;
 	};
-	currencies: { id: string; symbol: string }[];
+	currencies: ISiteCurrencies[];
 	categories: { id: string; name: string }[];
 	channels: string[];
 }
@@ -95,29 +144,34 @@ const siteResponseScheme = z.object({
 	channels: z.array(z.string())
 }) satisfies ZodType<ISiteResponse>;
 
+interface ISearchItem {
+	id: string;
+	title: string;
+	condition: string;
+	thumbnail_id: string;
+	thumbnail: string;
+	currency_id: string;
+	price: number;
+	catalog_product_id: string | null;
+	shipping: {
+		store_pick_up: boolean;
+		free_shipping: boolean;
+		logistic_type: string;
+		mode: string;
+		tags: string[];
+		benefits?: unknown;
+		promise?: unknown;
+	};
+	seller: {
+		id: number;
+		nickname: string;
+	};
+}
 interface ISearchResponse {
 	site_id: string;
 	country_default_time_zone: string;
 	query: string;
-	results: {
-		id: string;
-		title: string;
-		condition: string;
-		thumbnail_id: string;
-		thumbnail: string;
-		currency_id: string;
-		price: number;
-		catalog_product_id: string | null;
-		shipping: {
-			store_pick_up: boolean;
-			free_shipping: boolean;
-			logistic_type: string;
-			mode: string;
-			tags: string[];
-			benefits?: unknown;
-			promise?: unknown;
-		};
-	}[];
+	results: ISearchItem[];
 	filters: {
 		id: string;
 		name: string;
@@ -154,6 +208,10 @@ const searchResponseScheme = z.object({
 				tags: z.array(z.string()),
 				benefits: z.unknown(),
 				promise: z.unknown()
+			}),
+			seller: z.object({
+				id: z.number(),
+				nickname: z.string()
 			})
 		})
 	),
@@ -184,51 +242,16 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 	invariantResponse(data, "Meta - Missing search parameter");
 
 	return [
-		{ title: `${data.search} | Mercado Libre` },
+		{ title: `${data.searchQuery} | Mercado Libre` },
 		{
 			name: "description",
-			content: `Compre ${data.search} ahora mismo.`
+			content: `Compre ${data.searchQuery} ahora mismo.`
 		}
 	];
 };
-export const loader = async ({ request }: LoaderFunctionArgs) => {
-	const url = new URL(request.url);
-	const search = url.searchParams.get("search");
-
-	if (!search) {
-		return redirect("/");
-	}
-
-	const siteResponse = await fetch("https://api.mercadolibre.com/sites/MCO");
-	invariantResponse(siteResponse.ok, "Invalid site");
-	const siteResponseJSON = siteResponseScheme.safeParse(await siteResponse.json());
-	invariantResponse(
-		siteResponseJSON.success,
-		siteResponseJSON.error?.message ?? "Invalid site data object"
-	);
-
-	const currenciesResponse = await Promise.allSettled(
-		siteResponseJSON.data.currencies.map((currency) =>
-			fetch(`https://api.mercadolibre.com/currencies/${currency.id}`)
-		)
-	);
-	const currenciesResponseJSON = await Promise.all(
-		currenciesResponse.map(async (currencyResponse) => {
-			invariantResponse(
-				currencyResponse.status === "fulfilled" && currencyResponse.value.ok,
-				"Invalid currency"
-			);
-			const currencyJSON = currencyResponseScheme.safeParse(await currencyResponse.value.json());
-			invariantResponse(
-				currencyJSON.success,
-				currencyJSON.error?.message ?? "Invalid currency data object"
-			);
-			return currencyJSON.data;
-		})
-	);
-
+const getSearch = async (searchQuery: string) => {
 	const searchResponse = await fetch(
-		`https://api.mercadolibre.com/sites/MCO/search?q=${search}&limit=4`
+		`https://api.mercadolibre.com/sites/MCO/search?q=${searchQuery}&limit=4`
 	);
 	invariantResponse(searchResponse.ok, "Invalid search parameter");
 	const searchResponseJSON = searchResponseScheme.safeParse(await searchResponse.json());
@@ -237,46 +260,127 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 		searchResponseJSON.error?.message ?? "Invalid search data object"
 	);
 
-	return json({
-		search,
-		searchData: {
-			categories:
-				searchResponseJSON.data.filters
-					.find((filter) => filter.id === "category")
-					?.values.flatMap(
-						(filterValue) => filterValue.path_from_root?.map((category) => category.name) ?? []
-					) ?? [],
-			items: searchResponseJSON.data.results.map((item) => {
-				const currencyData = currenciesResponseJSON.find(
-					(currency) => currency.id === item.currency_id
-				);
+	return searchResponseJSON;
+};
+const getSellersLocation = async (items: ISearchItem[]) => {
+	return Promise.all(
+		items.map(async (item) => {
+			const sellerDetailsResponse = await fetch(
+				`https://api.mercadolibre.com/users/${item.seller.id}`
+			);
+			invariant(sellerDetailsResponse.ok, "Invalid seller");
 
-				return {
-					id: item.id,
-					title: item.title,
-					price: {
-						currency: currencyData?.id ?? item.currency_id,
-						amount: item.price,
-						decimals: currencyData?.decimal_places ?? 0
-					},
-					picture: `https://http2.mlstatic.com/D_NQ_NP_${item.thumbnail_id}-V.webp`,
-					condition: item.condition,
-					free_shipping: item.shipping.free_shipping
-				};
-			})
-		}
+			const sellerDetailsResponseJSON = sellerDetailsResponseSchema.safeParse(
+				await sellerDetailsResponse.json()
+			);
+			invariantResponse(
+				sellerDetailsResponseJSON.success,
+				sellerDetailsResponseJSON.error?.message ?? "Invalid seller data object"
+			);
+
+			return {
+				sellerId: sellerDetailsResponseJSON.data.id,
+				location: sellerDetailsResponseJSON.data.address.city
+			};
+		})
+	);
+};
+const getSite = async () => {
+	const siteResponse = await fetch("https://api.mercadolibre.com/sites/MCO");
+	invariantResponse(siteResponse.ok, "Invalid site");
+
+	const siteResponseJSON = siteResponseScheme.safeParse(await siteResponse.json());
+	invariantResponse(
+		siteResponseJSON.success,
+		siteResponseJSON.error?.message ?? "Invalid site data object"
+	);
+
+	return siteResponseJSON;
+};
+const getSiteCurrencies = async (currencies: ISiteCurrencies[]) => {
+	const currenciesResponse = await Promise.all(
+		currencies.map((currency) => fetch(`https://api.mercadolibre.com/currencies/${currency.id}`))
+	);
+
+	return await Promise.all(
+		currenciesResponse.map(async (currencyResponse) => {
+			invariantResponse(currencyResponse.ok, "Invalid currency");
+			const currencyJSON = currencyResponseScheme.safeParse(await currencyResponse.json());
+			invariantResponse(
+				currencyJSON.success,
+				currencyJSON.error?.message ?? "Invalid currency data object"
+			);
+			return currencyJSON.data;
+		})
+	);
+};
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+	const url = new URL(request.url);
+	const searchQuery = url.searchParams.get("search");
+
+	if (!searchQuery) {
+		return redirect("/");
+	}
+
+	async function getSiteAndSiteCurrencies() {
+		const site = await getSite();
+		const siteCurrencies = await getSiteCurrencies(site.data.currencies);
+
+		return { site, siteCurrencies };
+	}
+	async function getSearchAndSellersLocation(searchQuery: string) {
+		const search = await getSearch(searchQuery);
+		const sellersLocation = await getSellersLocation(search.data.results);
+
+		return { search, sellersLocation };
+	}
+
+	const loaderResponse = await promiseHash({
+		siteAndSiteCurrencies: getSiteAndSiteCurrencies(),
+		searchAndSellersLocation: getSearchAndSellersLocation(searchQuery)
+	});
+
+	return json({
+		searchQuery,
+		categories:
+			loaderResponse.searchAndSellersLocation.search.data.filters
+				.find((filter) => filter.id === "category")
+				?.values.flatMap(
+					(filterValue) => filterValue.path_from_root?.map((category) => category.name) ?? []
+				) ?? [],
+		items: loaderResponse.searchAndSellersLocation.search.data.results.map((item) => {
+			const currencyData = loaderResponse.siteAndSiteCurrencies.siteCurrencies.find(
+				(currency) => currency.id === item.currency_id
+			);
+			return {
+				id: item.id,
+				title: item.title,
+				price: {
+					currency: currencyData?.id ?? item.currency_id,
+					amount: item.price,
+					decimals: currencyData?.decimal_places ?? 0
+				},
+				picture: `https://http2.mlstatic.com/D_NQ_NP_${item.thumbnail_id}-V.webp`,
+				condition: item.condition,
+				free_shipping: item.shipping.free_shipping,
+				sellerLocation:
+					loaderResponse.searchAndSellersLocation.sellersLocation.find(
+						(sellerDetail) => sellerDetail.sellerId === item.seller.id
+					)?.location ?? null
+			};
+		})
 	});
 };
 
 export default function ItemsRoute() {
-	const { searchData } = useLoaderData<typeof loader>();
+	const { categories, items } = useLoaderData<typeof loader>();
 
 	return (
 		<PageContainer>
-			<BreadcrumbList categoryList={searchData.categories} />
+			<BreadcrumbList categoryList={categories} />
 
 			<section className={"mb-20 rounded-md bg-white px-4"}>
-				{searchData.items.map((item) => (
+				{items.map((item) => (
 					<ItemCard
 						id={item.id}
 						key={item.id}
@@ -286,6 +390,7 @@ export default function ItemsRoute() {
 						decimals={item.price.decimals}
 						imageURL={item.picture}
 						freeShipping={item.free_shipping}
+						sellerLocation={item.sellerLocation}
 					/>
 				))}
 			</section>
