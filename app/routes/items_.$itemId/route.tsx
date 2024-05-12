@@ -11,10 +11,10 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 	invariantResponse(data, "Meta - Missing itemId param");
 
 	return [
-		{ title: data.title },
+		{ title: data.item.title },
 		{
 			name: "description",
-			content: `${data.description.substring(0, 200).trim()}...`
+			content: `${data.item.description.substring(0, 200).trim()}...`
 		}
 	];
 };
@@ -28,46 +28,49 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 };
 
 export default function ItemsIdRoute() {
-	const data = useLoaderData<typeof loader>();
+	const { item, author } = useLoaderData<typeof loader>();
 	const formattedPrice = useFormatPrice({
-		currency: data.price.currency,
-		decimals: data.price.decimals,
-		amount: data.price.amount
+		currency: item.price.currency,
+		decimals: item.price.decimals,
+		amount: item.price.amount
 	});
 
 	return (
 		<PageContainer>
-			<BreadcrumbList categoryList={data.categories} />
+			{author.name && <p className={"hidden"}>author name: {author.name}</p>}
+			{author.lastName && <p className={"hidden"}>author last name: {author.lastName}</p>}
+
+			<BreadcrumbList categoryList={item.categories} />
 
 			<section className={"mb-20 grid grid-cols-10 gap-3 rounded-none bg-white lg:rounded-sm"}>
 				<div className={"col-span-10 space-y-8 pb-8 pl-8 pr-8 pt-8 lg:col-span-7 lg:pr-0"}>
 					<div className={"space-y-4"}>
 						<h6 className={"text-sm font-light text-gray-800 lg:hidden"}>
-							{data.condition === "new" ? "Nuevo" : "Usado"}
+							{item.condition === "new" ? "Nuevo" : "Usado"}
 						</h6>
-						<h1 className={"text-2xl font-semibold lg:hidden"}>{data.title}</h1>
+						<h1 className={"text-2xl font-semibold lg:hidden"}>{item.title}</h1>
 					</div>
 
 					<img
-						src={data.picture}
-						alt={data.title}
+						src={item.picture}
+						alt={item.title}
 						className={"max-h-[680px] object-contain"}
 						width={680}
 					/>
 				</div>
 				<div className={"col-span-10 space-y-4 pb-8 pl-8 pr-8 pt-8 lg:col-span-3 lg:pl-0"}>
 					<h6 className={"hidden text-sm font-light text-gray-800 lg:block"}>
-						{data.condition === "new" ? "Nuevo" : "Usado"}
+						{item.condition === "new" ? "Nuevo" : "Usado"}
 					</h6>
 					<div className={"space-y-8"}>
-						<h1 className={"hidden text-2xl font-semibold lg:block"}>{data.title}</h1>
+						<h1 className={"hidden text-2xl font-semibold lg:block"}>{item.title}</h1>
 						<h2 className={"text-4xl"}>{formattedPrice}</h2>
 						<Button />
 					</div>
 				</div>
 				<div className={"col-span-10 space-y-8 pb-8 pl-8 pr-8 pt-8 lg:col-span-7 lg:pr-0"}>
 					<h5 className={"text-2xl"}>Descripción del producto</h5>
-					<p className={"text-base font-light text-gray-700"}>{data.description}</p>
+					<p className={"text-base font-light text-gray-700"}>{item.description}</p>
 				</div>
 			</section>
 		</PageContainer>

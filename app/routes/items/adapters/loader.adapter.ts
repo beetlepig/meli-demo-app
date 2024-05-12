@@ -1,4 +1,5 @@
 import { getSearch, getSite, getSiteCurrencies, getSellersDetail } from "../services";
+import { getAuthorSignature } from "~/services";
 
 const itemsRouteLoaderAdapter = async ({ searchQuery }: { searchQuery: string }) => {
 	async function getSiteAndSiteCurrencies() {
@@ -19,8 +20,11 @@ const itemsRouteLoaderAdapter = async ({ searchQuery }: { searchQuery: string })
 		getSearchAndSellersDetail(searchQuery)
 	]);
 
+	const authorSignature = getAuthorSignature();
+
 	return {
 		searchQuery,
+		author: authorSignature,
 		categories:
 			loaderResponse[1].search.data.filters
 				.find((filter) => filter.id === "category")

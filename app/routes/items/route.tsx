@@ -31,10 +31,13 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 };
 
 export default function ItemsRoute() {
-	const { categories, items } = useLoaderData<typeof loader>();
+	const { categories, items, author } = useLoaderData<typeof loader>();
 
 	return (
 		<PageContainer>
+			{author.name && <p className={"hidden"}>author name: {author.name}</p>}
+			{author.lastName && <p className={"hidden"}>author last name: {author.lastName}</p>}
+
 			<BreadcrumbList categoryList={categories} />
 
 			<section className={"mb-20 rounded-md bg-white px-4"}>
