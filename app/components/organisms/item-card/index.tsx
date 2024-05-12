@@ -39,7 +39,7 @@ const ItemCard: FunctionComponent<ItemCardProps> = ({
 				src={imageURL}
 			/>
 			<div className={"col-span-7 ml-4 md:col-span-6"}>
-				<Link to={`/items/${id}`} title={title}>
+				<Link to={`/items/${id}`} title={title} prefetch={"intent"}>
 					<h3 className={"my-4 text-2xl font-light"}>
 						<span className={"align-middle after:mr-3 after:content-['']"}>{formattedPrice}</span>
 						{freeShipping && (

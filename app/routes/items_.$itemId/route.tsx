@@ -6,6 +6,8 @@ import Button from "~/components/atoms/Button";
 import PageContainer from "~/components/layout/page-container";
 import BreadcrumbList from "~/components/molecules/breadcrumb-list";
 import useFormatPrice from "~/hooks/format-price";
+import { endpointErrorScheme } from "~/models";
+import { getCurrencyDetails } from "~/services";
 
 interface ICategoryDetails {
 	id: string;
@@ -56,24 +58,6 @@ const categoryDetailsScheme = z.object({
 	date_created: z.string()
 }) satisfies ZodType<ICategoryDetails>;
 
-// TODO: Pasar eso al dominio y evitar repiticion
-interface ICurrencyResponse {
-	id: string;
-	symbol: string;
-	description: string;
-	decimal_places: number;
-}
-const currencyResponseScheme = z.object({
-	id: z.string(),
-	symbol: z.string(),
-	description: z.string(),
-	decimal_places: z.number()
-}) satisfies ZodType<ICurrencyResponse>;
-
-const endpointErrorScheme = z.object({
-	error: z.string(),
-	message: z.string()
-});
 const itemDetailScheme = z.object({
 	id: z.string(),
 	title: z.string(),
@@ -176,23 +160,7 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
 		categoryResponseJSON.error?.message ?? "Invalid category object"
 	);
 
-	const currencyResponse = await fetch(
-		`https://api.mercadolibre.com/currencies/${itemDetailsJSON.data.currency_id}`
-	);
-	if (!currencyResponse.ok) {
-		const currencyResponseFailedJSON = endpointErrorScheme.safeParse(await currencyResponse.json());
-
-		// eslint-disable-next-line @typescript-eslint/no-throw-literal
-		throw new Response(currencyResponseFailedJSON.data?.message ?? "Not a valid currency", {
-			status: currencyResponse.status,
-			statusText: currencyResponse.statusText
-		});
-	}
-	const currencyResponseJSON = currencyResponseScheme.safeParse(await currencyResponse.json());
-	invariantResponse(
-		currencyResponseJSON.success,
-		currencyResponseJSON.error?.message ?? "Invalid currency object"
-	);
+	const currencyResponseJSON = await getCurrencyDetails(itemDetailsJSON.data.currency_id);
 
 	return json({
 		id: itemDetailsJSON.data.id,
