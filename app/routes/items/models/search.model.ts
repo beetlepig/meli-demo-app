@@ -1,5 +1,5 @@
-import type { ISearchItem } from "./search-item.model";
 import { z, type ZodType } from "zod";
+import type { ISearchItem } from "~/models/item.model";
 
 interface ISearch {
 	site_id: string;

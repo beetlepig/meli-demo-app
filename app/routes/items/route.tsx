@@ -1,4 +1,4 @@
-import { ItemsRouteLoaderAdapter } from "./adapters/loader.adapter";
+import { itemsRouteLoaderAdapter } from "./adapters/loader.adapter";
 import { invariantResponse } from "@epic-web/invariant";
 import { json, type LoaderFunctionArgs, type MetaFunction, redirect } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
@@ -25,7 +25,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 		return redirect("/");
 	}
 
-	const loaderData = await ItemsRouteLoaderAdapter({ searchQuery });
+	const loaderData = await itemsRouteLoaderAdapter({ searchQuery });
 
 	return json(loaderData);
 };

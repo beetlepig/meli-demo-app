@@ -1,7 +1,7 @@
 import { getSearch, getSite, getSiteCurrencies, getSellersDetail } from "../services";
 import { promiseHash } from "remix-utils/promise";
 
-const ItemsRouteLoaderAdapter = async ({ searchQuery }: { searchQuery: string }) => {
+const itemsRouteLoaderAdapter = async ({ searchQuery }: { searchQuery: string }) => {
 	async function getSiteAndSiteCurrencies() {
 		const site = await getSite();
 		const siteCurrencies = await getSiteCurrencies(site.data.currencies);
@@ -52,4 +52,4 @@ const ItemsRouteLoaderAdapter = async ({ searchQuery }: { searchQuery: string })
 	};
 };
 
-export { ItemsRouteLoaderAdapter };
+export { itemsRouteLoaderAdapter };
