@@ -7,6 +7,10 @@ const getItemDescription = async (itemId: string) => {
 	if (!itemDescription.ok) {
 		const itemDescriptionFailedJSON = endpointErrorScheme.safeParse(await itemDescription.json());
 
+		if (itemDescription.status === 404) {
+			return null;
+		}
+
 		// eslint-disable-next-line @typescript-eslint/no-throw-literal
 		throw new Response(itemDescriptionFailedJSON.data?.message ?? "Not a valid item", {
 			status: itemDescription.status,

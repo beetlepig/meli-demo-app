@@ -15,7 +15,7 @@ const SearchInput: FunctionComponent<SearchInputProps> = ({ name, value, loading
 				Buscar en Mercado Libre:
 			</label>
 			<input
-				className={"w-full rounded px-3 text-base font-light"}
+				className={"w-full rounded bg-white px-3 text-base font-light"}
 				value={value}
 				onChange={(event) => {
 					onChange?.(event.currentTarget.value);

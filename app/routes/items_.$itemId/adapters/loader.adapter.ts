@@ -40,7 +40,9 @@ const itemsIdRouteLoaderAdapter = async (itemId: string) => {
 		picture: loaderResponse.itemDetailsAggregate.itemDetails.data.pictures[0].secure_url,
 		condition: loaderResponse.itemDetailsAggregate.itemDetails.data.condition,
 		free_shipping: loaderResponse.itemDetailsAggregate.itemDetails.data.shipping.free_shipping,
-		description: loaderResponse.itemDescription.data.plain_text
+		description:
+			loaderResponse.itemDescription?.data.plain_text ??
+			"El vendedor no incluyó una descripción del producto"
 	};
 };
 
