@@ -1,6 +1,6 @@
 import { invariantResponse } from "@epic-web/invariant";
-import { json, type LoaderFunctionArgs, type MetaFunction } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
+import { json, type LoaderFunctionArgs, type MetaFunction } from "@vercel/remix";
 import Button from "~/components/atoms/Button";
 import PageContainer from "~/components/layout/page-container";
 import BreadcrumbList from "~/components/molecules/breadcrumb-list";

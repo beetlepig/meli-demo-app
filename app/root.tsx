@@ -1,5 +1,4 @@
 import "@fontsource-variable/roboto-flex/wght.css";
-import { json, type LinksFunction, type LoaderFunctionArgs } from "@remix-run/node";
 import {
 	Links,
 	Meta,
@@ -9,6 +8,7 @@ import {
 	useLoaderData,
 	useNavigation
 } from "@remix-run/react";
+import { json, type LinksFunction, type LoaderFunctionArgs } from "@vercel/remix";
 import { Fragment, type ReactNode, useMemo } from "react";
 import SearchBar from "~/components/organisms/search-bar";
 import stylesheet from "~/tailwind.css?url";

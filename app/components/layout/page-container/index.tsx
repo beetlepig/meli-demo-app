@@ -1,5 +1,5 @@
 import { useNavigation } from "@remix-run/react";
-import { clsx } from "clsx";
+import { clsx } from "clsx/lite";
 import { type FunctionComponent, type ReactNode, useMemo } from "react";
 
 const PageContainer: FunctionComponent<{ children: ReactNode }> = ({ children }) => {

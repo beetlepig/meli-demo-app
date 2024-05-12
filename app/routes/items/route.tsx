@@ -1,7 +1,7 @@
 import { itemsRouteLoaderAdapter } from "./adapters/loader.adapter";
 import { invariantResponse } from "@epic-web/invariant";
-import { json, type LoaderFunctionArgs, type MetaFunction, redirect } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
+import { json, type LoaderFunctionArgs, type MetaFunction, redirect } from "@vercel/remix";
 import PageContainer from "~/components/layout/page-container";
 import BreadcrumbList from "~/components/molecules/breadcrumb-list";
 import ItemCard from "~/components/organisms/item-card";
