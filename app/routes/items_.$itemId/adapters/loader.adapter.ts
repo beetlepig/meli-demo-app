@@ -1,4 +1,3 @@
-import { promiseHash } from "remix-utils/promise";
 import {
 	getCategoryDetails,
 	getItemDescription,
@@ -9,40 +8,39 @@ import { getCurrencyDetails } from "~/services";
 const itemsIdRouteLoaderAdapter = async (itemId: string) => {
 	async function getItemDetailsAggregate(itemId: string) {
 		const itemDetails = await getItemDetails(itemId);
-		const categoryDetailsAndCurrencyDetails = await promiseHash({
-			categoryDetails: getCategoryDetails(itemDetails.data.category_id),
-			currencyDetails: getCurrencyDetails(itemDetails.data.currency_id)
-		});
+		const categoryDetailsAndCurrencyDetails = await Promise.all([
+			getCategoryDetails(itemDetails.data.category_id),
+			getCurrencyDetails(itemDetails.data.currency_id)
+		]);
 
 		return {
 			itemDetails,
-			categoryDetails: categoryDetailsAndCurrencyDetails.categoryDetails,
-			currencyDetails: categoryDetailsAndCurrencyDetails.currencyDetails
+			categoryDetails: categoryDetailsAndCurrencyDetails[0],
+			currencyDetails: categoryDetailsAndCurrencyDetails[1]
 		};
 	}
 
-	const loaderResponse = await promiseHash({
-		itemDetailsAggregate: getItemDetailsAggregate(itemId),
-		itemDescription: getItemDescription(itemId)
-	});
+	const loaderResponse = await Promise.all([
+		getItemDetailsAggregate(itemId),
+		getItemDescription(itemId)
+	]);
 
 	return {
-		id: loaderResponse.itemDetailsAggregate.itemDetails.data.id,
-		title: loaderResponse.itemDetailsAggregate.itemDetails.data.title,
-		categories: loaderResponse.itemDetailsAggregate.categoryDetails.data.path_from_root.map(
+		id: loaderResponse[0].itemDetails.data.id,
+		title: loaderResponse[0].itemDetails.data.title,
+		categories: loaderResponse[0].categoryDetails.data.path_from_root.map(
 			(category) => category.name
 		),
 		price: {
-			currency: loaderResponse.itemDetailsAggregate.currencyDetails.data.id,
-			amount: loaderResponse.itemDetailsAggregate.itemDetails.data.price,
-			decimals: loaderResponse.itemDetailsAggregate.currencyDetails.data.decimal_places
+			currency: loaderResponse[0].currencyDetails.data.id,
+			amount: loaderResponse[0].itemDetails.data.price,
+			decimals: loaderResponse[0].currencyDetails.data.decimal_places
 		},
-		picture: loaderResponse.itemDetailsAggregate.itemDetails.data.pictures[0].secure_url,
-		condition: loaderResponse.itemDetailsAggregate.itemDetails.data.condition,
-		free_shipping: loaderResponse.itemDetailsAggregate.itemDetails.data.shipping.free_shipping,
+		picture: loaderResponse[0].itemDetails.data.pictures[0].secure_url,
+		condition: loaderResponse[0].itemDetails.data.condition,
+		free_shipping: loaderResponse[0].itemDetails.data.shipping.free_shipping,
 		description:
-			loaderResponse.itemDescription?.data.plain_text ??
-			"El vendedor no incluyó una descripción del producto"
+			loaderResponse[1]?.data.plain_text ?? "El vendedor no incluyó una descripción del producto"
 	};
 };
 

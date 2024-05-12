@@ -40,6 +40,8 @@ const SearchInput: FunctionComponent<SearchInputProps> = ({ name, value, loading
 					<img
 						alt={"search_icon"}
 						src={"/icons/ic_search.png"}
+						srcSet="/icons/ic_search.png 1x,
+  						/icons/ic_search@2x.png 2x"
 						className={"m-auto"}
 						width={16}
 						height={16}

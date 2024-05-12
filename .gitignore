@@ -1,5 +1,5 @@
-# Created by https://www.toptal.com/developers/gitignore/api/remix,webstorm+all,visualstudiocode,vim,windows,macos,linux
-# Edit at https://www.toptal.com/developers/gitignore?templates=remix,webstorm+all,visualstudiocode,vim,windows,macos,linux
+# Created by https://www.toptal.com/developers/gitignore/api/vim,linux,macos,remix,windows,webstorm+all,visualstudiocode,remix+vercel
+# Edit at https://www.toptal.com/developers/gitignore?templates=vim,linux,macos,remix,windows,webstorm+all,visualstudiocode,remix+vercel
 
 ### Linux ###
 *~
@@ -55,6 +55,12 @@ node_modules
 /build
 /public/build
 .env
+
+### Remix+Vercel ###
+.vercel
+.output
+/api/index.js
+/api/index.js.map
 
 ### Vim ###
 # Swap
@@ -209,4 +215,4 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-# End of https://www.toptal.com/developers/gitignore/api/remix,webstorm+all,visualstudiocode,vim,windows,macos,linux
+# End of https://www.toptal.com/developers/gitignore/api/vim,linux,macos,remix,windows,webstorm+all,visualstudiocode,remix+vercel

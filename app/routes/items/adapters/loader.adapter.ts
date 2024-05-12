@@ -1,5 +1,4 @@
 import { getSearch, getSite, getSiteCurrencies, getSellersDetail } from "../services";
-import { promiseHash } from "remix-utils/promise";
 
 const itemsRouteLoaderAdapter = async ({ searchQuery }: { searchQuery: string }) => {
 	async function getSiteAndSiteCurrencies() {
@@ -15,21 +14,21 @@ const itemsRouteLoaderAdapter = async ({ searchQuery }: { searchQuery: string })
 		return { search, sellersLocation };
 	}
 
-	const loaderResponse = await promiseHash({
-		siteAndSiteCurrencies: getSiteAndSiteCurrencies(),
-		searchAndSellersLocation: getSearchAndSellersDetail(searchQuery)
-	});
+	const loaderResponse = await Promise.all([
+		getSiteAndSiteCurrencies(),
+		getSearchAndSellersDetail(searchQuery)
+	]);
 
 	return {
 		searchQuery,
 		categories:
-			loaderResponse.searchAndSellersLocation.search.data.filters
+			loaderResponse[1].search.data.filters
 				.find((filter) => filter.id === "category")
 				?.values.flatMap(
 					(filterValue) => filterValue.path_from_root?.map((category) => category.name) ?? []
 				) ?? [],
-		items: loaderResponse.searchAndSellersLocation.search.data.results.map((item) => {
-			const currencyData = loaderResponse.siteAndSiteCurrencies.siteCurrencies.find(
+		items: loaderResponse[1].search.data.results.map((item) => {
+			const currencyData = loaderResponse[0].siteCurrencies.find(
 				(currency) => currency.data.id === item.currency_id
 			);
 			return {
@@ -44,7 +43,7 @@ const itemsRouteLoaderAdapter = async ({ searchQuery }: { searchQuery: string })
 				condition: item.condition,
 				free_shipping: item.shipping.free_shipping,
 				sellerLocation:
-					loaderResponse.searchAndSellersLocation.sellersLocation.find(
+					loaderResponse[1].sellersLocation.find(
 						(sellerDetail) => sellerDetail.data.id === item.seller.id
 					)?.data.address.city ?? null
 			};
