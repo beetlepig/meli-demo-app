@@ -46,7 +46,7 @@ interface IItemDetail {
 		dimensions: null;
 		local_pick_up: boolean;
 		free_shipping: boolean;
-		logistic_type: string;
+		logistic_type: string | null;
 		store_pick_up: boolean;
 	};
 }
@@ -74,7 +74,7 @@ const itemDetailScheme = z.object({
 		dimensions: z.null(),
 		local_pick_up: z.boolean(),
 		free_shipping: z.boolean(),
-		logistic_type: z.string(),
+		logistic_type: z.string().or(z.null()),
 		store_pick_up: z.boolean()
 	})
 }) satisfies ZodType<IItemDetail>;
