@@ -40,7 +40,7 @@ export default function ItemsIdRoute() {
 			<BreadcrumbList categoryList={data.categories} />
 
 			<section className={"mb-20 grid grid-cols-10 gap-3 rounded-none bg-white lg:rounded-sm"}>
-				<div className={"col-span-10 space-y-8 pb-8 pl-8 pt-8 lg:col-span-7"}>
+				<div className={"col-span-10 space-y-8 pb-8 pl-8 pr-8 pt-8 lg:col-span-7 lg:pr-0"}>
 					<div className={"space-y-4"}>
 						<h6 className={"text-sm font-light text-gray-800 lg:hidden"}>
 							{data.condition === "new" ? "Nuevo" : "Usado"}
