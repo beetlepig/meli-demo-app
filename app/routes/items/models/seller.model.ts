@@ -12,7 +12,7 @@ interface ISellerDetails {
 	site_id: string;
 	permalink: string;
 	seller_reputation: {
-		level_id: string;
+		level_id: string | null;
 		power_seller_status: string | null;
 		transactions: {
 			period: string;
@@ -36,7 +36,7 @@ const sellerDetailsSchema = z.object({
 	site_id: z.string(),
 	permalink: z.string(),
 	seller_reputation: z.object({
-		level_id: z.string(),
+		level_id: z.string().or(z.null()),
 		power_seller_status: z.string().or(z.null()),
 		transactions: z.object({
 			period: z.string(),

@@ -1,5 +1,6 @@
-import { type ISearchItem, sellerDetailsSchema } from "../models";
+import { sellerDetailsSchema } from "../models";
 import { invariant, invariantResponse } from "@epic-web/invariant";
+import type { ISearchItem } from "~/models";
 
 const getSellersDetail = async (items: ISearchItem[]) => {
 	return Promise.all(

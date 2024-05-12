@@ -38,7 +38,7 @@ const searchScheme = z.object({
 			shipping: z.object({
 				store_pick_up: z.boolean(),
 				free_shipping: z.boolean(),
-				logistic_type: z.string(),
+				logistic_type: z.string().or(z.null()),
 				mode: z.string(),
 				tags: z.array(z.string()),
 				benefits: z.unknown(),

@@ -12,7 +12,7 @@ interface ISearchItem {
 	shipping: {
 		store_pick_up: boolean;
 		free_shipping: boolean;
-		logistic_type: string;
+		logistic_type: string | null;
 		mode: string;
 		tags: string[];
 		benefits?: unknown;
