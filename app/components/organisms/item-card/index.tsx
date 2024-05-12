@@ -31,15 +31,17 @@ const ItemCard: FunctionComponent<ItemCardProps> = ({
 
 	return (
 		<div className={"grid grid-cols-10 border-b border-gray-100 py-4"}>
-			<img
-				className={"col-span-3 h-[180px] w-[180px] rounded object-contain md:col-span-2"}
-				width={180}
-				height={180}
-				alt={title}
-				src={imageURL}
-			/>
+			<Link to={`/items/${id}`} prefetch={"intent"} className={"contents"}>
+				<img
+					className={"col-span-3 h-[180px] w-[180px] rounded object-contain md:col-span-2"}
+					width={180}
+					height={180}
+					alt={title}
+					src={imageURL}
+				/>
+			</Link>
 			<div className={"col-span-7 ml-4 md:col-span-6"}>
-				<Link to={`/items/${id}`} title={title} prefetch={"intent"}>
+				<Link to={`/items/${id}`} prefetch={"intent"} className={"contents"}>
 					<h3 className={"my-4 text-2xl font-light"}>
 						<span className={"align-middle after:mr-3 after:content-['']"}>{formattedPrice}</span>
 						{freeShipping && (
@@ -55,7 +57,9 @@ const ItemCard: FunctionComponent<ItemCardProps> = ({
 						)}
 					</h3>
 				</Link>
-				<h2 className={"text-lg font-light"}>{title}</h2>
+				<Link to={`/items/${id}`} title={title} prefetch={"intent"}>
+					<h2 className={"text-lg font-light"}>{title}</h2>
+				</Link>
 				<h5 className={"col-span-2 my-4 text-sm font-light text-gray-800 md:hidden"}>
 					{sellerLocation}
 				</h5>
