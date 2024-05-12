@@ -13,7 +13,7 @@ import { Fragment, type ReactNode, useMemo } from "react";
 import SearchBar from "~/components/organisms/search-bar";
 import stylesheet from "~/tailwind.css?url";
 
-export const config = { runtime: "edge" };
+export const config = { runtime: "nodejs" };
 
 export const links: LinksFunction = () => [{ rel: "stylesheet", href: stylesheet }];
 export const loader = ({ request }: LoaderFunctionArgs) => {
