@@ -8,6 +8,7 @@ import {
 	useLoaderData,
 	useNavigation
 } from "@remix-run/react";
+import { Analytics } from "@vercel/analytics/react";
 import { json, type LinksFunction, type LoaderFunctionArgs } from "@vercel/remix";
 import { Fragment, type ReactNode, useMemo } from "react";
 import SearchBar from "~/components/organisms/search-bar";
@@ -36,6 +37,7 @@ export function Layout({ children }: { children: ReactNode }) {
 				{children}
 				<ScrollRestoration />
 				<Scripts />
+				<Analytics />
 				{process.env.NODE_ENV === "development" && <script src="http://localhost:8097"></script>}
 			</body>
 		</html>
