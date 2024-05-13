@@ -30,7 +30,7 @@ const ItemCard: FunctionComponent<ItemCardProps> = ({
 	});
 
 	return (
-		<div className={"grid grid-cols-10 border-b border-gray-100 py-4"}>
+		<div className={"grid grid-cols-10 border-b border-gray-100 py-4"} data-testid={"item-element"}>
 			<Link to={`/items/${id}`} prefetch={"intent"} className={"contents"}>
 				<img
 					className={"col-span-3 h-[180px] w-[180px] rounded object-contain md:col-span-2"}

@@ -7,10 +7,12 @@
     "build": "remix vite:build",
     "dev": "remix vite:dev",
     "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
-    "start": "remix-serve ./build/server/index.js",
+    "start": "remix-serve ./build/server/edge-*/index.js",
     "typecheck": "tsc",
-    "format": "prettier -uw --cache --ignore-path .gitignore"
-  },
+    "format": "prettier -uw --cache --ignore-path .gitignore",
+		"test": "playwright test",
+		"playwright:install": "playwright install"
+	},
   "dependencies": {
     "@epic-web/invariant": "^1.0.0",
     "@fontsource-variable/roboto-flex": "^5.0.15",
