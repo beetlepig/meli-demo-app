@@ -37,7 +37,5 @@ test.describe("Search Page", () => {
 		await itemLink.click();
 
 		await page.waitForURL("**/items/*");
-
-		await page.pause();
 	});
 });
