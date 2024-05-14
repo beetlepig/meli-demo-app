@@ -2,7 +2,7 @@
 
 This application utilizes the official Mercado Libre API to recreate a basic version of the official application.
 
-The project was developed using **Remix**, a full-stack React framework chosen for its suitability for this demo's requirements, including SEO and performance.
+The project was developed using [**Remix**](https://remix.run), a full-stack React framework chosen for its suitability for this demo's requirements, including SEO and performance.
 
 Remix provides us with **SSR** capabilities, which are ideal for enhancing SEO and performance. It allows for server-only code execution, making it suitable for backend tasks such as database interaction or managing sensitive information. Additionally, it offers a client-side rich UI powered by React.
 
