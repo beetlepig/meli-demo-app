@@ -6,7 +6,8 @@ import {
 	Scripts,
 	ScrollRestoration,
 	useLoaderData,
-	useNavigation
+	useNavigation,
+	useRouteLoaderData
 } from "@remix-run/react";
 import { Analytics } from "@vercel/analytics/react";
 import { json, type LinksFunction, type LoaderFunctionArgs } from "@vercel/remix";
@@ -21,11 +22,15 @@ export const links: LinksFunction = () => [{ rel: "stylesheet", href: stylesheet
 export const loader = ({ request }: LoaderFunctionArgs) => {
 	const url = new URL(request.url);
 	const search = url.searchParams.get("search");
+	const isDevelopment = process.env.NODE_ENV === "development";
+	const isPlaywright = Boolean(process.env.IS_PLAYWRIGHT);
 
-	return json({ search });
+	return json({ search, isDevelopment, isPlaywright });
 };
 
 export function Layout({ children }: { children: ReactNode }) {
+	const data = useRouteLoaderData<typeof loader>("root");
+
 	return (
 		<html lang="es-CO">
 			<head>
@@ -38,9 +43,9 @@ export function Layout({ children }: { children: ReactNode }) {
 				{children}
 				<ScrollRestoration />
 				<Scripts />
-				<Analytics />
-				<SpeedInsights />
-				{process.env.NODE_ENV === "development" && <script src="http://localhost:8097"></script>}
+				{!data?.isPlaywright && <Analytics />}
+				{!data?.isPlaywright && <SpeedInsights />}
+				{(!data || data.isDevelopment) && <script src="http://localhost:8097"></script>}
 			</body>
 		</html>
 	);

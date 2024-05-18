@@ -10,9 +10,9 @@
     "start": "remix-serve ./build/server/edge-*/index.js",
     "typecheck": "tsc",
     "format": "prettier -uw --cache --ignore-path .gitignore",
-		"test": "playwright test",
-		"playwright:install": "playwright install"
-	},
+    "test": "IS_PLAYWRIGHT=true playwright test",
+    "playwright:install": "playwright install"
+  },
   "dependencies": {
     "@epic-web/invariant": "^1.0.0",
     "@fontsource-variable/roboto-flex": "^5.0.15",
@@ -20,6 +20,7 @@
     "@remix-run/react": "^2.9.2",
     "@remix-run/serve": "^2.9.2",
     "@vercel/analytics": "^1.2.2",
+    "@vercel/edge": "^1.1.1",
     "@vercel/remix": "^2.9.2-patch.2",
     "@vercel/speed-insights": "^1.0.10",
     "clsx": "^2.1.1",

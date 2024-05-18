@@ -1,6 +1,7 @@
 import { itemsRouteLoaderAdapter } from "./adapters/loader.adapter";
 import { invariantResponse } from "@epic-web/invariant";
 import { useLoaderData } from "@remix-run/react";
+import { geolocation } from "@vercel/edge";
 import { json, type LoaderFunctionArgs, type MetaFunction, redirect } from "@vercel/remix";
 import PageContainer from "~/components/layout/page-container";
 import BreadcrumbList from "~/components/molecules/breadcrumb-list";
@@ -10,7 +11,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 	invariantResponse(data, "Meta - Missing search parameter");
 
 	return [
-		{ title: `${data.searchQuery} | Mercado Libre` },
+		{ title: `${data.searchQuery} | Mercado Libre ${data.countryInfo.flag}` },
 		{
 			name: "description",
 			content: `Compre ${data.searchQuery} ahora mismo.`
@@ -18,6 +19,7 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => {
 	];
 };
 export const loader = async ({ request }: LoaderFunctionArgs) => {
+	const geolocationInfo = geolocation(request);
 	const url = new URL(request.url);
 	const searchQuery = url.searchParams.get("search");
 
@@ -25,13 +27,13 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 		return redirect("/");
 	}
 
-	const loaderData = await itemsRouteLoaderAdapter({ searchQuery });
+	const loaderData = await itemsRouteLoaderAdapter({ searchQuery, geolocationInfo });
 
 	return json(loaderData);
 };
 
 export default function ItemsRoute() {
-	const { categories, items, author } = useLoaderData<typeof loader>();
+	const { categories, items, author, countryInfo } = useLoaderData<typeof loader>();
 
 	return (
 		<PageContainer>
@@ -52,6 +54,7 @@ export default function ItemsRoute() {
 						imageURL={item.picture}
 						freeShipping={item.free_shipping}
 						sellerLocation={item.sellerLocation}
+						countryLocale={countryInfo.locale}
 					/>
 				))}
 			</section>

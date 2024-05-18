@@ -1,6 +1,6 @@
 import { Link } from "@remix-run/react";
 import { type FunctionComponent, memo } from "react";
-import useFormatPrice from "~/hooks/format-price";
+import { useFormatPrice } from "~/utils/hooks";
 
 interface ItemCardProps {
 	id: string;
@@ -11,6 +11,7 @@ interface ItemCardProps {
 	imageURL: string;
 	freeShipping: boolean;
 	sellerLocation: string | null;
+	countryLocale: string;
 }
 
 const ItemCard: FunctionComponent<ItemCardProps> = ({
@@ -21,9 +22,11 @@ const ItemCard: FunctionComponent<ItemCardProps> = ({
 	decimals,
 	imageURL,
 	freeShipping,
-	sellerLocation
+	sellerLocation,
+	countryLocale
 }) => {
 	const formattedPrice = useFormatPrice({
+		locale: countryLocale,
 		currency: currency,
 		decimals: decimals,
 		amount: amount

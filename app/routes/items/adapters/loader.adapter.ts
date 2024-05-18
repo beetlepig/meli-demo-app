@@ -1,23 +1,34 @@
 import { getSearch, getSite, getSiteCurrencies, getSellersDetail } from "../services";
-import { getAuthorSignature } from "~/services";
+import type { Geo } from "@vercel/edge";
+import { getAuthorSignature, getCountryDetails } from "~/services";
+import { getSiteLocaleInfo } from "~/utils";
 
-const itemsRouteLoaderAdapter = async ({ searchQuery }: { searchQuery: string }) => {
-	async function getSiteAndSiteCurrencies() {
-		const site = await getSite();
+const itemsRouteLoaderAdapter = async ({
+	searchQuery,
+	geolocationInfo: { country }
+}: {
+	searchQuery: string;
+	geolocationInfo: Geo;
+}) => {
+	const siteLocaleInfo = getSiteLocaleInfo(country);
+
+	async function getSiteAndSiteCurrencies(siteName: string) {
+		const site = await getSite(siteName);
 		const siteCurrencies = await getSiteCurrencies(site.data.currencies);
 
 		return { site, siteCurrencies };
 	}
-	async function getSearchAndSellersDetail(searchQuery: string) {
-		const search = await getSearch(searchQuery);
+	async function getSearchAndSellersDetail(siteName: string, searchQuery: string) {
+		const search = await getSearch(siteName, searchQuery);
 		const sellersLocation = await getSellersDetail(search.data.results);
 
 		return { search, sellersLocation };
 	}
 
 	const loaderResponse = await Promise.all([
-		getSiteAndSiteCurrencies(),
-		getSearchAndSellersDetail(searchQuery)
+		getSiteAndSiteCurrencies(siteLocaleInfo.siteName),
+		getCountryDetails(siteLocaleInfo.countryCode),
+		getSearchAndSellersDetail(siteLocaleInfo.siteName, searchQuery)
 	]);
 
 	const authorSignature = getAuthorSignature();
@@ -25,13 +36,17 @@ const itemsRouteLoaderAdapter = async ({ searchQuery }: { searchQuery: string })
 	return {
 		searchQuery,
 		author: authorSignature,
+		countryInfo: {
+			locale: loaderResponse[1].data.locale.replaceAll("_", "-"),
+			flag: siteLocaleInfo.flag
+		},
 		categories:
-			loaderResponse[1].search.data.filters
+			loaderResponse[2].search.data.filters
 				.find((filter) => filter.id === "category")
 				?.values.flatMap(
 					(filterValue) => filterValue.path_from_root?.map((category) => category.name) ?? []
 				) ?? [],
-		items: loaderResponse[1].search.data.results.map((item) => {
+		items: loaderResponse[2].search.data.results.map((item) => {
 			const currencyData = loaderResponse[0].siteCurrencies.find(
 				(currency) => currency.data.id === item.currency_id
 			);
@@ -47,7 +62,7 @@ const itemsRouteLoaderAdapter = async ({ searchQuery }: { searchQuery: string })
 				condition: item.condition,
 				free_shipping: item.shipping.free_shipping,
 				sellerLocation:
-					loaderResponse[1].sellersLocation.find(
+					loaderResponse[2].sellersLocation.find(
 						(sellerDetail) => sellerDetail.data.id === item.seller.id
 					)?.data.address.city ?? null
 			};
