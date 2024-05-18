@@ -1,24 +1,24 @@
-const getSiteName = (countryCode: string) => {
+const getSiteLocaleInfo = (countryCode?: string) => {
 	switch (countryCode) {
 		case "CO": {
-			return "MCO";
+			return { siteName: "MCO", countryCode: countryCode, flag: "🇨🇴" };
 		}
 		case "MX": {
-			return "MLM";
+			return { siteName: "MLM", countryCode: countryCode, flag: "🇲🇽" };
 		}
 		case "CL": {
-			return "MLC";
+			return { siteName: "MLC", countryCode: countryCode, flag: "🇨🇱" };
 		}
 		case "AR": {
-			return "MLA";
+			return { siteName: "MLA", countryCode: countryCode, flag: "🇦🇷" };
 		}
 		case "PE": {
-			return "MPE";
+			return { siteName: "MPE", countryCode: countryCode, flag: "🇵🇪" };
 		}
 		default: {
-			return "MLA";
+			return { siteName: "MLA", countryCode: "AR", flag: "🇦🇷" };
 		}
 	}
 };
 
-export { getSiteName };
+export { getSiteLocaleInfo };

@@ -1,16 +1,16 @@
 import { getSearch, getSite, getSiteCurrencies, getSellersDetail } from "../services";
 import type { Geo } from "@vercel/edge";
 import { getAuthorSignature, getCountryDetails } from "~/services";
-import { getSiteName } from "~/utils";
+import { getSiteLocaleInfo } from "~/utils";
 
 const itemsRouteLoaderAdapter = async ({
 	searchQuery,
-	geolocationInfo: { country = "AR", flag = "🇦🇷" }
+	geolocationInfo: { country }
 }: {
 	searchQuery: string;
 	geolocationInfo: Geo;
 }) => {
-	const siteName = getSiteName(country);
+	const siteLocaleInfo = getSiteLocaleInfo(country);
 
 	async function getSiteAndSiteCurrencies(siteName: string) {
 		const site = await getSite(siteName);
@@ -26,9 +26,9 @@ const itemsRouteLoaderAdapter = async ({
 	}
 
 	const loaderResponse = await Promise.all([
-		getSiteAndSiteCurrencies(siteName),
-		getCountryDetails(country),
-		getSearchAndSellersDetail(siteName, searchQuery)
+		getSiteAndSiteCurrencies(siteLocaleInfo.siteName),
+		getCountryDetails(siteLocaleInfo.countryCode),
+		getSearchAndSellersDetail(siteLocaleInfo.siteName, searchQuery)
 	]);
 
 	const authorSignature = getAuthorSignature();
@@ -36,7 +36,10 @@ const itemsRouteLoaderAdapter = async ({
 	return {
 		searchQuery,
 		author: authorSignature,
-		countryInfo: { locale: loaderResponse[1].data.locale.replaceAll("_", "-"), flag: flag },
+		countryInfo: {
+			locale: loaderResponse[1].data.locale.replaceAll("_", "-"),
+			flag: siteLocaleInfo.flag
+		},
 		categories:
 			loaderResponse[2].search.data.filters
 				.find((filter) => filter.id === "category")

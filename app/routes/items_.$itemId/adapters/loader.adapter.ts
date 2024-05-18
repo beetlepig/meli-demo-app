@@ -5,14 +5,17 @@ import {
 	getItemDetails
 } from "~/routes/items_.$itemId/services";
 import { getAuthorSignature, getCountryDetails, getCurrencyDetails } from "~/services";
+import { getSiteLocaleInfo } from "~/utils";
 
 const itemsIdRouteLoaderAdapter = async ({
 	itemId,
-	geolocationInfo: { country = "AR", flag = "🇦🇷" }
+	geolocationInfo: { country }
 }: {
 	itemId: string;
 	geolocationInfo: Geo;
 }) => {
+	const siteLocaleInfo = getSiteLocaleInfo(country);
+
 	async function getItemDetailsAggregate(itemId: string) {
 		const itemDetails = await getItemDetails(itemId);
 		const categoryDetailsAndCurrencyDetails = await Promise.all([
@@ -30,14 +33,17 @@ const itemsIdRouteLoaderAdapter = async ({
 	const loaderResponse = await Promise.all([
 		getItemDetailsAggregate(itemId),
 		getItemDescription(itemId),
-		getCountryDetails(country)
+		getCountryDetails(siteLocaleInfo.countryCode)
 	]);
 
 	const authorSignature = getAuthorSignature();
 
 	return {
 		author: authorSignature,
-		countryInfo: { locale: loaderResponse[2].data.locale.replaceAll("_", "-"), flag: flag },
+		countryInfo: {
+			locale: loaderResponse[2].data.locale.replaceAll("_", "-"),
+			flag: siteLocaleInfo.flag
+		},
 		item: {
 			id: loaderResponse[0].itemDetails.data.id,
 			title: loaderResponse[0].itemDetails.data.title,
