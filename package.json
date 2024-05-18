@@ -10,7 +10,7 @@
     "start": "remix-serve ./build/server/edge-*/index.js",
     "typecheck": "tsc",
     "format": "prettier -uw --cache --ignore-path .gitignore",
-    "test": "playwright test",
+    "test": "IS_PLAYWRIGHT=true playwright test",
     "playwright:install": "playwright install"
   },
   "dependencies": {

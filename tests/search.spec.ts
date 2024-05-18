@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test.describe("Search Page", () => {
 	test.beforeEach(async ({ page }) => {
 		await page.goto("./items?search=PS5");
-		await expect(page).toHaveTitle("PS5 | Mercado Libre");
+		await expect(page).toHaveTitle("PS5 | Mercado Libre 🇦🇷");
 	});
 
 	test("Navigate Home", async ({ page }) => {
