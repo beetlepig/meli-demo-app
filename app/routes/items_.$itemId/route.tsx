@@ -4,8 +4,8 @@ import { json, type LoaderFunctionArgs, type MetaFunction } from "@vercel/remix"
 import Button from "~/components/atoms/Button";
 import PageContainer from "~/components/layout/page-container";
 import BreadcrumbList from "~/components/molecules/breadcrumb-list";
-import useFormatPrice from "~/hooks/format-price";
 import { itemsIdRouteLoaderAdapter } from "~/routes/items_.$itemId/adapters/loader.adapter";
+import { useFormatPrice } from "~/utils/hooks";
 
 export function ErrorBoundary() {
 	const error = useRouteError();

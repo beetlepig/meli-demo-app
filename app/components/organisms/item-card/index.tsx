@@ -1,6 +1,6 @@
 import { Link } from "@remix-run/react";
 import { type FunctionComponent, memo } from "react";
-import useFormatPrice from "~/hooks/format-price";
+import { useFormatPrice } from "~/utils/hooks";
 
 interface ItemCardProps {
 	id: string;

@@ -1,15 +1,21 @@
 import { getSearch, getSite, getSiteCurrencies, getSellersDetail } from "../services";
 import { getAuthorSignature } from "~/services";
 
-const itemsRouteLoaderAdapter = async ({ searchQuery }: { searchQuery: string }) => {
+const itemsRouteLoaderAdapter = async ({
+	searchQuery,
+	siteName
+}: {
+	searchQuery: string;
+	siteName: string;
+}) => {
 	async function getSiteAndSiteCurrencies() {
-		const site = await getSite();
+		const site = await getSite(siteName);
 		const siteCurrencies = await getSiteCurrencies(site.data.currencies);
 
 		return { site, siteCurrencies };
 	}
 	async function getSearchAndSellersDetail(searchQuery: string) {
-		const search = await getSearch(searchQuery);
+		const search = await getSearch(siteName, searchQuery);
 		const sellersLocation = await getSellersDetail(search.data.results);
 
 		return { search, sellersLocation };

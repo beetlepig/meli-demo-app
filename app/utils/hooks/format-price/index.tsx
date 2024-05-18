@@ -18,4 +18,4 @@ const useFormatPrice = ({ currency, decimals, amount }: UseFormatPriceArgs) => {
 	);
 };
 
-export default useFormatPrice;
+export { useFormatPrice };
