@@ -1,5 +1,6 @@
 import { invariantResponse } from "@epic-web/invariant";
 import { isRouteErrorResponse, useLoaderData, useRouteError } from "@remix-run/react";
+import { geolocation } from "@vercel/edge";
 import { json, type LoaderFunctionArgs, type MetaFunction } from "@vercel/remix";
 import Button from "~/components/atoms/Button";
 import PageContainer from "~/components/layout/page-container";
@@ -38,7 +39,13 @@ export function ErrorBoundary() {
 }
 export const meta: MetaFunction<typeof loader> = ({ data, error }) => {
 	return [
-		{ title: data ? data.item.title : isRouteErrorResponse(error) ? error.status : "Error" },
+		{
+			title: data
+				? `${data.item.title} | Mercado Libre ${data.countryInfo.flag}`
+				: isRouteErrorResponse(error)
+					? error.status
+					: "Error"
+		},
 		{
 			name: "description",
 			content: data
@@ -49,18 +56,24 @@ export const meta: MetaFunction<typeof loader> = ({ data, error }) => {
 		}
 	];
 };
-export const loader = async ({ params }: LoaderFunctionArgs) => {
+export const loader = async ({ request, params }: LoaderFunctionArgs) => {
+	const geolocationInfo = geolocation(request);
 	const itemId = params.itemId;
 	invariantResponse(itemId, "Missing itemId param");
 
-	const loaderData = await itemsIdRouteLoaderAdapter(itemId);
+	const loaderData = await itemsIdRouteLoaderAdapter({
+		itemId,
+		geolocationInfo
+	});
 
 	return json(loaderData);
 };
 
 export default function ItemsIdRoute() {
-	const { item, author } = useLoaderData<typeof loader>();
+	const { item, author, countryInfo } = useLoaderData<typeof loader>();
+
 	const formattedPrice = useFormatPrice({
+		locale: countryInfo.locale,
 		currency: item.price.currency,
 		decimals: item.price.decimals,
 		amount: item.price.amount

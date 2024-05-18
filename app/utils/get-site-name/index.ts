@@ -1,4 +1,4 @@
-const getSiteName = (countryCode?: string) => {
+const getSiteName = (countryCode: string) => {
 	switch (countryCode) {
 		case "CO": {
 			return "MCO";

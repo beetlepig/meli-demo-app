@@ -1,11 +1,18 @@
+import type { Geo } from "@vercel/edge";
 import {
 	getCategoryDetails,
 	getItemDescription,
 	getItemDetails
 } from "~/routes/items_.$itemId/services";
-import { getAuthorSignature, getCurrencyDetails } from "~/services";
+import { getAuthorSignature, getCountryDetails, getCurrencyDetails } from "~/services";
 
-const itemsIdRouteLoaderAdapter = async (itemId: string) => {
+const itemsIdRouteLoaderAdapter = async ({
+	itemId,
+	geolocationInfo: { country = "AR", flag = "🇦🇷" }
+}: {
+	itemId: string;
+	geolocationInfo: Geo;
+}) => {
 	async function getItemDetailsAggregate(itemId: string) {
 		const itemDetails = await getItemDetails(itemId);
 		const categoryDetailsAndCurrencyDetails = await Promise.all([
@@ -22,13 +29,15 @@ const itemsIdRouteLoaderAdapter = async (itemId: string) => {
 
 	const loaderResponse = await Promise.all([
 		getItemDetailsAggregate(itemId),
-		getItemDescription(itemId)
+		getItemDescription(itemId),
+		getCountryDetails(country)
 	]);
 
 	const authorSignature = getAuthorSignature();
 
 	return {
 		author: authorSignature,
+		countryInfo: { locale: loaderResponse[2].data.locale.replaceAll("_", "-"), flag: flag },
 		item: {
 			id: loaderResponse[0].itemDetails.data.id,
 			title: loaderResponse[0].itemDetails.data.title,
